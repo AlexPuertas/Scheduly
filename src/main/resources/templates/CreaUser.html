@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Usuario — Scheduly</title>
+    <link rel="stylesheet" th:href="@{/css/index-style.css}">
+    <style>
+        body { display: flex; flex-direction: column; }
+        .form-group select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7A99' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+    </style>
+</head>
+<body>
+    <nav class="topbar">
+        <a href="/horarios" class="logo">Scheduly</a>
+        <a href="/usuarios" class="back-link">&#8592; Volver a usuarios</a>
+    </nav>
+
+    <div class="form-page-body">
+        <div style="width:100%;max-width:560px;padding:0 20px;">
+            <div class="breadcrumb">
+                <a href="/usuarios">Usuarios</a>
+                &#8250;
+                <span>Crear usuario</span>
+            </div>
+
+            <div class="form-card">
+                <div class="form-header">
+                    <div class="eyebrow">Administración</div>
+                    <h1>Crear usuario</h1>
+                </div>
+
+                <form th:action="@{/usuarios/crear}" method="post">
+                    <div class="section-divider">Datos de acceso</div>
+
+                    <div class="form-group">
+                        <label for="email">Email <span style="color:#C0392B">*</span></label>
+                        <input type="email" id="email" name="email" placeholder="usuario@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña <span style="color:#C0392B">*</span></label>
+                        <input type="password" id="password" name="password" placeholder="Mínimo 6 caracteres" minlength="6" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rol">Rol <span style="color:#C0392B">*</span></label>
+                        <select id="rol" name="rol" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="CLIENTE">Cliente</option>
+                            <option value="EMPRESA">Empresa</option>
+                        </select>
+                    </div>
+
+                    <div class="section-divider">Información adicional <span style="font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></div>
+
+                    <div class="form-group">
+                        <label for="nombre">Nombre completo <span class="optional">(opcional)</span></label>
+                        <input type="text" id="nombre" name="nombre" placeholder="Juan Pérez / Mi Empresa S.L.">
+                    </div>
+                    <div class="form-group">
+                        <label for="direccion">Dirección <span class="optional">(opcional)</span></label>
+                        <input type="text" id="direccion" name="direccion" placeholder="Calle Principal 123, Granada">
+                    </div>
+                    <div class="form-group">
+                        <label for="telefono">Teléfono <span class="optional">(opcional)</span></label>
+                        <input type="tel" id="telefono" name="telefono" placeholder="+34 600 123 456">
+                    </div>
+
+                    <div class="btn-row">
+                        <button type="submit" class="btn-submit">Crear usuario</button>
+                        <a href="/usuarios" class="btn-cancel">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

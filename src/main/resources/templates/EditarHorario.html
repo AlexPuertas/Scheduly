@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Horario — Scheduly</title>
+    <link rel="stylesheet" th:href="@{/css/index-style.css}">
+    <style>
+        body { display: flex; flex-direction: column; }
+        .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+
+        input[type="date"],
+        input[type="time"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            color: var(--text);
+            background: white;
+            transition: border-color 0.18s, box-shadow 0.18s;
+            outline: none;
+        }
+
+        input[type="date"]:focus,
+        input[type="time"]:focus {
+            border-color: var(--navy);
+            box-shadow: 0 0 0 3px rgba(27,42,74,0.09);
+        }
+
+        .date-preview {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            margin-bottom: 24px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+
+        .date-preview.has-date { background: #EFF2FA; color: var(--navy); font-weight: 600; }
+
+        @media (max-width: 600px) { .time-row { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<nav class="topbar">
+    <a href="/horarios" class="logo">Scheduly</a>
+    <a href="/horarios" class="back-link">&#8592; Volver a horarios</a>
+</nav>
+
+<div class="form-page-body">
+    <div style="width:100%;max-width:520px;padding:0 20px;">
+
+        <div class="breadcrumb">
+            <a href="/horarios">Horarios</a> &#8250; <span>Editar horario #<span th:text="${horario.id}"></span></span>
+        </div>
+
+        <div class="form-card">
+            <div class="form-header">
+                <div class="eyebrow">Modificar disponibilidad</div>
+                <h1>Editar horario</h1>
+                <p>Cambia la fecha o el tramo horario. Solo puedes editar horarios sin reserva.</p>
+            </div>
+
+            <form th:action="@{/horarios/editar/{id}(id=${horario.id})}" method="post">
+
+                <div class="form-group">
+                    <label class="field-label" for="fecha">Fecha del horario</label>
+                    <input type="date" id="fecha" name="fecha" required
+                           th:value="${horario.fecha}"
+                           onchange="actualizarPreview(this.value)">
+                </div>
+
+                <div class="date-preview has-date" id="datePreview">
+                    &#128197; <span id="previewText"></span>
+                </div>
+
+                <div class="section-divider">Franja horaria</div>
+
+                <div class="time-row">
+                    <div>
+                        <label class="field-label" for="horaInicio">Hora inicio</label>
+                        <input type="time" id="horaInicio" name="horaInicio" required
+                               th:value="${horario.horaInicio}">
+                    </div>
+                    <div>
+                        <label class="field-label" for="horaFin">Hora fin</label>
+                        <input type="time" id="horaFin" name="horaFin" required
+                               th:value="${horario.horaFin}">
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <button type="submit" class="btn-submit">Guardar cambios</button>
+                    <a href="/horarios" class="btn-cancel">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+    function actualizarPreview(valor) {
+        const preview = document.getElementById('datePreview');
+        const text = document.getElementById('previewText');
+        if (!valor) { preview.classList.remove('has-date'); text.textContent = ''; return; }
+        const [y, m, d] = valor.split('-').map(Number);
+        const fecha = new Date(y, m - 1, d);
+        text.textContent = `${DIAS[fecha.getDay()]}, ${d} de ${MESES[m-1]} de ${y}`;
+        preview.classList.add('has-date');
+    }
+
+    // Inicializar preview con la fecha actual del horario
+    const fechaInput = document.getElementById('fecha');
+    if (fechaInput.value) actualizarPreview(fechaInput.value);
+
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const ini = document.getElementById('horaInicio').value;
+        const fin = document.getElementById('horaFin').value;
+        if (ini && fin && fin <= ini) {
+            e.preventDefault();
+            alert('La hora de fin debe ser posterior a la hora de inicio');
+        }
+    });
+</script>
+</body>
+</html>

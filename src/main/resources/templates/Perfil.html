@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil — Scheduly</title>
+    <link rel="stylesheet" th:href="@{/css/index-style.css}">
+    <style>
+        body { display: flex; flex-direction: column; }
+
+        .read-field {
+            padding: 12px 15px;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.92rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .rol-block {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+            padding-bottom: 28px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .rol-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 16px;
+            border-radius: 99px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .rol-pill.empresa { background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE; }
+        .rol-pill.cliente { background: #F0F9FF; color: #0369A1; border: 1px solid #BAE6FD; }
+
+        .readonly-note {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-left">
+        <a href="/horarios" class="logo">Scheduly</a>
+        <div class="nav-links">
+            <a href="/horarios" class="nav-link">&#128197; Horarios</a>
+            <a href="/horarios/perfil" class="nav-link active">&#128100; Mi perfil</a>
+        </div>
+    </div>
+    <div class="nav-right">
+        <div class="user-chip">
+            <div class="user-avatar">?</div>
+            <span th:text="${usuario.nombre != null and !#strings.isEmpty(usuario.nombre)} ? ${usuario.nombre} : ${usuario.email}">Usuario</span>
+            <span class="chevron">&#9660;</span>
+            <div class="user-dropdown">
+                <div class="dropdown-header">
+                    <div class="dh-label">Sesión activa</div>
+                    <strong th:text="${usuario.email}">email</strong>
+                </div>
+                <form th:action="@{/logout}" method="post" style="margin:0">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="btn-logout">&#8594; Cerrar sesión</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div th:if="${exito}" class="flash-bar exito">&#10003; <span th:text="${exito}"></span></div>
+<div th:if="${error}"  class="flash-bar error">&#9888; <span th:text="${error}"></span></div>
+
+<div class="page">
+    <div style="max-width:600px;margin:0 auto;">
+
+        <div class="page-header" style="margin-bottom:32px">
+            <div class="page-header-left">
+                <div class="eyebrow">Cuenta</div>
+                <h1>Mi perfil</h1>
+            </div>
+        </div>
+
+        <div style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:36px;box-shadow:var(--shadow-sm);">
+
+            <!-- Avatar + info -->
+            <div class="profile-header">
+                <div class="profile-avatar"
+                     th:text="${(usuario.nombre != null and !#strings.isEmpty(usuario.nombre)) ? #strings.toUpperCase(#strings.substring(usuario.nombre, 0, 1)) : ((usuario.email != null and !#strings.isEmpty(usuario.email)) ? #strings.toUpperCase(#strings.substring(usuario.email, 0, 1)) : '?')}">
+                </div>
+                <div class="profile-meta">
+                    <h2 th:text="${(usuario.nombre != null and !#strings.isEmpty(usuario.nombre)) ? usuario.nombre : 'Sin nombre'}"></h2>
+                    <p th:text="${usuario.email}"></p>
+                </div>
+            </div>
+
+            <!-- Rol -->
+            <div class="rol-block">
+                <span class="rol-pill empresa" th:if="${usuario.rol.name() == 'EMPRESA'}">&#127970; Empresa</span>
+                <span class="rol-pill cliente" th:if="${usuario.rol.name() == 'CLIENTE'}">&#128100; Cliente</span>
+            </div>
+
+            <!-- Formulario -->
+            <form th:action="@{/horarios/perfil}" method="post">
+
+                <div class="section-divider">Datos de acceso</div>
+
+                <div class="form-group">
+                    <label class="field-label">Email</label>
+                    <div class="read-field" th:text="${usuario.email}"></div>
+                    <div class="readonly-note">&#128274; El email no se puede cambiar</div>
+                </div>
+
+                <div class="section-divider">Información personal</div>
+
+                <div class="form-group">
+                    <label class="field-label" for="nombre">
+                        Nombre
+                        <span class="optional" th:if="${usuario.rol.name() == 'EMPRESA'}">(nombre de empresa)</span>
+                    </label>
+                    <input type="text" id="nombre" name="nombre"
+                           th:value="${usuario.nombre}"
+                           placeholder="Tu nombre completo">
+                </div>
+
+                <div th:if="${usuario.rol.name() == 'EMPRESA'}">
+                    <div class="form-group">
+                        <label class="field-label" for="telefono">Teléfono</label>
+                        <input type="tel" id="telefono" name="telefono"
+                               th:value="${usuario.telefono}"
+                               placeholder="+34 600 123 456">
+                    </div>
+                    <div class="form-group">
+                        <label class="field-label" for="direccion">Dirección</label>
+                        <input type="text" id="direccion" name="direccion"
+                               th:value="${usuario.direccion}"
+                               placeholder="Calle Principal 123, Granada">
+                    </div>
+                </div>
+
+                <!-- Campos ocultos para clientes -->
+                <th:block th:if="${usuario.rol.name() == 'CLIENTE'}">
+                    <input type="hidden" name="telefono" th:value="${usuario.telefono}">
+                    <input type="hidden" name="direccion" th:value="${usuario.direccion}">
+                </th:block>
+
+                <button type="submit" class="btn-submit" style="margin-top:8px">Guardar cambios</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

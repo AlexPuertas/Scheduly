@@ -1,0 +1,19 @@
+spring.application.name=scheduly
+
+# Base de datos MySQL — copia este archivo a application.properties y rellena tus credenciales
+spring.datasource.url=jdbc:mysql://localhost:3306/scheduly?useSSL=false&serverTimezone=UTC
+spring.datasource.username=TU_USUARIO_MYSQL
+spring.datasource.password=TU_PASSWORD_MYSQL
+
+# JPA/Hibernate
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+spring.jpa.properties.hibernate.format_sql=true
+
+# Thymeleaf
+spring.thymeleaf.cache=false
+
+# Logging (opcional en producción)
+# logging.level.org.springframework.security=DEBUG
+# logging.level.com.example.scheduly=DEBUG

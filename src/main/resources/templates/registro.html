@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro — Scheduly</title>
+    <link rel="stylesheet" th:href="@{/css/index-style.css}">
+    <style>
+        body { display: flex; flex-direction: column; }
+
+        .tipo-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .tipo-btn {
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            text-align: center;
+        }
+
+        .tipo-btn:hover { border-color: var(--navy); }
+        .tipo-btn.active.empresa { border-color: var(--amber); background: #FFF8EC; }
+        .tipo-btn.active.cliente { border-color: #3b82f6; background: #EFF6FF; }
+
+        .tipo-btn .icon { font-size: 1.6rem; display: block; margin-bottom: 6px; }
+        .tipo-btn .tipo-name { font-size: 0.85rem; font-weight: 700; display: block; color: var(--navy); }
+        .tipo-btn small { font-size: 0.75rem; color: var(--muted); }
+
+        .hidden-field { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="topbar">
+        <a href="/" class="logo">Scheduly</a>
+        <a href="/" class="back-link">&#8592; Volver al inicio</a>
+    </div>
+
+    <div class="form-page-body">
+        <div class="form-card">
+            <div class="form-header">
+                <div class="step-tag">Nueva cuenta</div>
+                <h1>Crear cuenta</h1>
+                <p>Elige tu tipo de cuenta y completa el formulario</p>
+            </div>
+
+            <div th:if="${error}" class="alert alert-danger">
+                &#9888; <span th:text="${error}"></span>
+            </div>
+
+            <div class="tipo-selector" id="tipoSelector">
+                <div class="tipo-btn empresa" id="btnEmpresa" onclick="selectTipo('EMPRESA')">
+                    <span class="icon">&#127970;</span>
+                    <span class="tipo-name">Empresa</span>
+                    <small>Publica horarios</small>
+                </div>
+                <div class="tipo-btn cliente" id="btnCliente" onclick="selectTipo('CLIENTE')">
+                    <span class="icon">&#128100;</span>
+                    <span class="tipo-name">Cliente</span>
+                    <small>Reserva citas</small>
+                </div>
+            </div>
+
+            <form th:action="@{/registro}" method="post" id="registroForm">
+                <input type="hidden" id="rol" name="rol" required>
+
+                <div class="section-divider">Datos de acceso</div>
+
+                <div class="form-group">
+                    <label for="email">Email <span style="color:#C0392B">*</span></label>
+                    <input type="email" id="email" name="email" placeholder="tu@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Contraseña <span style="color:#C0392B">*</span></label>
+                    <input type="password" id="password" name="password" placeholder="Mínimo 6 caracteres" minlength="6" required>
+                </div>
+
+                <div class="section-divider">Información adicional <span style="font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></div>
+
+                <div class="form-group">
+                    <label for="nombre">Nombre completo <span class="optional">(opcional)</span></label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Juan Pérez / Mi Empresa S.L.">
+                </div>
+
+                <div class="form-group hidden-field" id="fieldDireccion">
+                    <label for="direccion">Dirección <span class="optional">(opcional)</span></label>
+                    <input type="text" id="direccion" name="direccion" placeholder="Calle Principal 123, Granada">
+                </div>
+
+                <div class="form-group hidden-field" id="fieldTelefono">
+                    <label for="telefono">Teléfono <span class="optional">(opcional)</span></label>
+                    <input type="tel" id="telefono" name="telefono" placeholder="+34 600 123 456">
+                </div>
+
+                <button type="submit" class="btn-submit">Crear cuenta</button>
+            </form>
+
+            <div class="login-link">
+                ¿Ya tienes cuenta? <a href="/">Inicia sesión aquí</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectTipo(tipo) {
+            document.getElementById('rol').value = tipo;
+            document.getElementById('btnEmpresa').classList.toggle('active', tipo === 'EMPRESA');
+            document.getElementById('btnCliente').classList.toggle('active', tipo === 'CLIENTE');
+            const isEmpresa = tipo === 'EMPRESA';
+            document.getElementById('fieldDireccion').style.display = isEmpresa ? 'block' : 'none';
+            document.getElementById('fieldTelefono').style.display = isEmpresa ? 'block' : 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const tipo = new URLSearchParams(window.location.search).get('tipo');
+            if (tipo) selectTipo(tipo.toUpperCase());
+        });
+
+        document.getElementById('registroForm').addEventListener('submit', function (e) {
+            if (!document.getElementById('rol').value) {
+                e.preventDefault();
+                alert('Por favor selecciona el tipo de cuenta');
+            }
+        });
+    </script>
+</body>
+</html>

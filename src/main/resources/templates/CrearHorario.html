@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Horario — Scheduly</title>
+    <link rel="stylesheet" th:href="@{/css/index-style.css}">
+    <style>
+        body { display: flex; flex-direction: column; }
+
+        .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+
+        input[type="date"],
+        input[type="time"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            color: var(--text);
+            background: white;
+            transition: border-color 0.18s, box-shadow 0.18s;
+            outline: none;
+        }
+
+        input[type="date"]:focus,
+        input[type="time"]:focus {
+            border-color: var(--navy);
+            box-shadow: 0 0 0 3px rgba(27,42,74,0.09);
+        }
+
+        .date-preview {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            margin-bottom: 24px;
+            font-size: 0.875rem;
+            color: var(--muted);
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+
+        .date-preview.has-date { background: #EFF2FA; color: var(--navy); font-weight: 600; }
+
+        .empresa-banner {
+            background: #FFF8EC;
+            border: 1px solid #FDDFA3;
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            font-size: 0.855rem;
+            color: #92600A;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 600px) { .time-row { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<nav class="topbar">
+    <a href="/horarios" class="logo">Scheduly</a>
+    <a th:href="${adminMode} ? '/usuarios' : '/horarios'" class="back-link">&#8592; Volver</a>
+</nav>
+
+<div class="form-page-body">
+    <div style="width:100%;max-width:520px;padding:0 20px;">
+
+        <div class="breadcrumb">
+            <a href="/horarios">Horarios</a>
+            &#8250;
+            <span th:if="${adminMode}"><a href="/usuarios">Usuarios</a> &#8250; </span>
+            <span>Crear horario</span>
+        </div>
+
+        <div class="form-card">
+            <div class="form-header">
+                <div class="eyebrow">Nueva disponibilidad</div>
+                <h1>Crear horario</h1>
+                <p>Elige una fecha concreta y el tramo horario disponible.</p>
+            </div>
+
+            <div class="empresa-banner" th:if="${adminMode}">
+                &#127970; Empresa: <strong th:text="${empresa.nombre != null ? empresa.nombre : empresa.email}"></strong>
+            </div>
+
+            <form th:action="${adminMode} ? '/horarios/crear-admin/' + ${empresa.email} : '/horarios/crear/' + ${empresa.email}"
+                  method="post">
+
+                <div class="form-group">
+                    <label class="field-label" for="fecha">Fecha del horario</label>
+                    <input type="date" id="fecha" name="fecha" required
+                           th:min="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
+                           onchange="actualizarPreview(this.value)">
+                </div>
+
+                <!-- Preview legible del día -->
+                <div class="date-preview" id="datePreview">
+                    Selecciona una fecha para ver el día de la semana
+                </div>
+
+                <div class="section-divider">Franja horaria</div>
+
+                <div class="time-row">
+                    <div>
+                        <label class="field-label" for="horaInicio">Hora inicio</label>
+                        <input type="time" id="horaInicio" name="horaInicio" required>
+                    </div>
+                    <div>
+                        <label class="field-label" for="horaFin">Hora fin</label>
+                        <input type="time" id="horaFin" name="horaFin" required>
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <button type="submit" class="btn-submit">&#43; Crear horario</button>
+                    <a th:href="${adminMode} ? '/usuarios' : '/horarios'" class="btn-cancel">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+    function actualizarPreview(valor) {
+        const preview = document.getElementById('datePreview');
+        if (!valor) {
+            preview.textContent = 'Selecciona una fecha para ver el día de la semana';
+            preview.classList.remove('has-date');
+            return;
+        }
+        // Parsear sin problema de zona horaria
+        const [y, m, d] = valor.split('-').map(Number);
+        const fecha = new Date(y, m - 1, d);
+        const dia = DIAS[fecha.getDay()];
+        const texto = `${dia}, ${d} de ${MESES[m - 1]} de ${y}`;
+        preview.textContent = '📅 ' + texto;
+        preview.classList.add('has-date');
+    }
+
+    // Validar que hora fin > hora inicio al enviar
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const ini = document.getElementById('horaInicio').value;
+        const fin = document.getElementById('horaFin').value;
+        if (ini && fin && fin <= ini) {
+            e.preventDefault();
+            alert('La hora de fin debe ser posterior a la hora de inicio');
+        }
+    });
+</script>
+</body>
+</html>

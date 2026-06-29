@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheduly — Gestión de Horarios</title>
+    <link rel="stylesheet" th:href="@{/css/index-style.css}">
+    <style>
+        body { background: var(--surface); display: flex; flex-direction: column; }
+
+        /* HERO */
+        .hero {
+            background: var(--navy);
+            padding: 72px 64px 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 70% 80% at 80% 50%, rgba(212,160,23,0.08) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .hero-inner { position: relative; z-index: 1; max-width: 560px; }
+
+        .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(212,160,23,0.15);
+            border: 1px solid rgba(212,160,23,0.35);
+            color: var(--amber-light);
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 6px 14px;
+            border-radius: 99px;
+            margin-bottom: 28px;
+        }
+
+        .hero h1 {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-size: clamp(3rem, 6vw, 5rem);
+            font-weight: 400;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            color: var(--white);
+            margin-bottom: 18px;
+        }
+
+        .hero h1 .accent { color: var(--amber); }
+
+        .hero p {
+            color: rgba(255,255,255,0.5);
+            font-size: 1.05rem;
+            line-height: 1.65;
+            max-width: 400px;
+        }
+
+        /* GRID */
+        .page-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            flex: 1;
+        }
+
+        /* LOGIN PANEL */
+        .login-panel {
+            padding: 60px 64px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-right: 1px solid var(--border);
+            background: var(--white);
+        }
+
+        .panel-label {
+            font-size: 0.71rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .panel-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .form-group { margin-bottom: 18px; }
+
+        .form-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.93rem;
+            color: var(--text);
+            background: var(--white);
+            transition: border-color 0.18s, box-shadow 0.18s;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: var(--navy);
+            box-shadow: 0 0 0 3px rgba(27,42,74,0.09);
+        }
+
+        .form-group input::placeholder { color: #A8B4CC; }
+
+        .check-row {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 24px;
+            font-size: 0.875rem;
+            color: var(--muted);
+        }
+
+        .check-row input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--navy);
+            cursor: pointer;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: var(--navy);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.18s, transform 0.15s, box-shadow 0.18s;
+            letter-spacing: 0.01em;
+        }
+
+        .btn-login:hover {
+            background: var(--navy-light);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(27,42,74,0.25);
+        }
+
+        .alert {
+            padding: 13px 16px;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .alert-danger  { background: var(--danger-bg);  color: var(--danger);  border: 1px solid #F3B9B3; }
+        .alert-success { background: var(--success-bg); color: var(--success); border: 1px solid #A7D7C0; }
+
+        /* REGISTER PANEL */
+        .register-panel {
+            padding: 60px 64px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: var(--surface);
+        }
+
+        .reg-title {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-size: 1.75rem;
+            font-weight: 400;
+            margin-bottom: 28px;
+            color: var(--navy);
+            line-height: 1.2;
+        }
+
+        .account-cards { display: flex; flex-direction: column; gap: 14px; }
+
+        .account-card {
+            background: var(--white);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 22px 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            text-decoration: none;
+            color: var(--text);
+            transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .account-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .account-card.empresa:hover { border-color: var(--amber); }
+        .account-card.cliente:hover { border-color: #3b82f6; }
+
+        .card-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.4rem;
+        }
+
+        .card-icon.empresa { background: #FFF8EC; border: 1px solid #FDDFA3; }
+        .card-icon.cliente { background: #EFF6FF; border: 1px solid #BFDBFE; }
+
+        .card-text { flex: 1; }
+
+        .card-text h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 3px;
+            color: var(--navy);
+        }
+
+        .card-text p { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
+
+        .card-arrow {
+            margin-left: auto;
+            color: var(--muted);
+            font-size: 1rem;
+            transition: transform 0.2s, color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .account-card:hover .card-arrow { transform: translateX(4px); color: var(--navy); }
+
+        /* FOOTER */
+        .footer {
+            background: var(--navy-dark);
+            color: rgba(255,255,255,0.35);
+            text-align: center;
+            padding: 22px;
+            font-size: 0.79rem;
+        }
+
+        .footer strong { color: rgba(255,255,255,0.6); }
+
+        @media (max-width: 900px) {
+            .page-grid { grid-template-columns: 1fr; }
+            .login-panel { border-right: none; border-bottom: 1px solid var(--border); padding: 48px 32px; }
+            .register-panel { padding: 48px 32px; }
+            .hero { padding: 52px 32px 44px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        <div class="hero-inner">
+            <div class="hero-tag">&#128197; Sistema de reservas</div>
+            <h1>Sched<span class="accent">uly</span></h1>
+            <p>Gestión de horarios para empresas y clientes. Simple, rápido y seguro.</p>
+        </div>
+    </div>
+
+    <div class="page-grid">
+
+        <!-- LOGIN -->
+        <div class="login-panel">
+            <div class="panel-label">Acceder a tu cuenta</div>
+
+            <div th:if="${error}" class="alert alert-danger">
+                &#9888; <span th:text="${error}">Email o contraseña incorrectos</span>
+            </div>
+            <div th:if="${logout}" class="alert alert-success">
+                &#10003; <span th:text="${logout}">Has cerrado sesión correctamente</span>
+            </div>
+            <div th:if="${registro}" class="alert alert-success">
+                &#10003; <span th:text="${registro}">¡Registro exitoso! Ya puedes iniciar sesión</span>
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="form-group">
+                    <label for="username">Email</label>
+                    <input type="email" id="username" name="username" placeholder="tu@email.com" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                </div>
+                <div class="check-row">
+                    <input type="checkbox" id="remember-me" name="remember-me">
+                    <label for="remember-me">Recordarme en este dispositivo</label>
+                </div>
+                <button type="submit" class="btn-login">Iniciar sesión</button>
+            </form>
+        </div>
+
+        <!-- REGISTER -->
+        <div class="register-panel">
+            <div class="panel-label">Nueva cuenta</div>
+            <p class="reg-title">¿Primera vez<br>en Scheduly?</p>
+
+            <div class="account-cards">
+                <a href="/registro?tipo=empresa" class="account-card empresa">
+                    <div class="card-icon empresa">&#127970;</div>
+                    <div class="card-text">
+                        <h3>Cuenta Empresa</h3>
+                        <p>Publica y gestiona tus horarios disponibles</p>
+                    </div>
+                    <span class="card-arrow">&#8594;</span>
+                </a>
+
+                <a href="/registro?tipo=cliente" class="account-card cliente">
+                    <div class="card-icon cliente">&#128100;</div>
+                    <div class="card-text">
+                        <h3>Cuenta Cliente</h3>
+                        <p>Reserva citas y gestiona tus horarios</p>
+                    </div>
+                    <span class="card-arrow">&#8594;</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <strong>Scheduly</strong> &mdash; &copy; 2026 Sistema de Gestión de Horarios
+    </div>
+
+</body>
+</html>
