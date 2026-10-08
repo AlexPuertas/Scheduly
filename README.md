@@ -8,6 +8,8 @@
 
 Scheduly es una aplicación web construida con **Spring Boot** que permite a negocios de cualquier sector gestionar sus turnos y a sus clientes reservarlos de forma sencilla. El sistema diferencia dos roles bien definidos: **EMPRESA** y **CLIENTE**, con autenticación y control de acceso implementados con Spring Security.
 
+!AVISO! Este proyecto esta realizado sin control de versiones, se ha creado y luego limpiado y subido con ayuda con la IA.
+
 ---
 
 ## Stack tecnológico
